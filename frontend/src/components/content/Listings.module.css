@@ -1,0 +1,156 @@
+.listingCard {
+  --rarity-border: #ffffff;
+  border-color: var(--rarity-border) !important;
+  border-radius: 6px !important;
+  background: rgba(21, 10, 24, 0.95);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.34);
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.05rem;
+  line-height: 1.2;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.unidentified {
+  color: #e9d0ff;
+}
+
+.overallPct {
+  margin-left: 0.45rem;
+  color: #c5c8d4;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.statRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  column-gap: 0.55rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.96rem;
+}
+
+.statValue {
+  font-weight: 700;
+}
+
+.positive {
+  color: #56fe56;
+}
+
+.positive::before {
+  content: "+";
+}
+
+.negative {
+  color: #f85252;
+}
+
+.statName {
+  color: #d9d7d9;
+}
+
+.statPct {
+  color: #c1c0c1;
+  font-size: 0.9rem;
+}
+
+.priceMeta {
+  margin-left: 0.45rem;
+  color: #c4c6d0;
+  font-size: 0.8rem;
+}
+
+.avgGood {
+  color: #56fe56;
+}
+
+.avgHigh {
+  color: #f85252;
+}
+
+.avgNeutral {
+  color: #c1c0c1;
+}
+
+.itemFooter {
+  margin-top: 0.55rem;
+  text-align: center;
+  color: #8f93a2;
+}
+
+.mythicCard {
+  --rarity-border: rgb(162, 0, 162);
+}
+
+.fabledCard {
+  --rarity-border: rgb(246, 62, 62);
+}
+
+.legendaryCard {
+  --rarity-border: rgb(80, 253, 255);
+}
+
+.rareCard {
+  --rarity-border: rgb(255, 80, 232);
+}
+
+.uniqueCard {
+  --rarity-border: rgb(252, 252, 84);
+}
+
+.setCard {
+  --rarity-border: rgb(90, 255, 90);
+}
+
+.commonCard {
+  --rarity-border: rgb(210, 214, 226);
+}
+
+.mythic {
+  color: rgb(187, 0, 187);
+}
+
+.fabled {
+  color: #ff5555;
+}
+
+.legendary {
+  color: #55ffff;
+}
+
+.rare {
+  color: #ff55ff;
+}
+
+.unique {
+  color: #ffff55;
+}
+
+.set {
+  color: #55ff55;
+}
+
+.common {
+  color: #f2f4fa;
+}
+
+@media (max-width: 576px) {
+  .title {
+    font-size: 1rem;
+  }
+
+  .statRow {
+    font-size: 0.9rem;
+  }
+}
