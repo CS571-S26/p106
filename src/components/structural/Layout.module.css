@@ -3,6 +3,11 @@
 }
 
 .navbar {
+  --bs-navbar-brand-color: #f1f5ff;
+  --bs-navbar-brand-hover-color: #f1f5ff;
+  --bs-navbar-color: #dbe2f5;
+  --bs-navbar-hover-color: #ffffff;
+  --bs-navbar-active-color: #8cf7b6;
   position: sticky;
   top: 0;
   z-index: 20;
@@ -19,6 +24,47 @@
   color: #f1f5ff;
   font-weight: 700;
   letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.brand:hover,
+.brand:focus,
+.brand:focus-visible {
+  color: #ffffff;
+}
+
+.brand:active {
+  color: #8cf7b6;
+}
+
+.brand[aria-current="page"] {
+  color: #8cf7b6;
+}
+
+.brandLogo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.35rem rgba(120, 251, 174, 0.45));
+}
+
+.navLink {
+  color: #dbe2f5;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.navLink:hover,
+.navLink:focus-visible {
+  color: #ffffff;
+}
+
+.navLink:active,
+.navLink[aria-current="page"] {
+  color: #8cf7b6;
 }
 
 .content {

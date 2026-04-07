@@ -1,0 +1,50 @@
+.card {
+  border: 1px solid #2f3a51;
+  background: linear-gradient(180deg, rgba(23, 29, 43, 0.92), rgba(15, 20, 31, 0.94));
+}
+
+.header {
+  border-bottom: 1px solid #2f3a51;
+  background: rgba(8, 12, 19, 0.6);
+}
+
+.title {
+  margin: 0;
+  color: #edf2ff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.key {
+  display: inline-block;
+  margin-top: 0.25rem;
+  color: #8ff5b5;
+  font-size: 0.75rem;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  color: #c9d1e4;
+}
+
+.table {
+  margin-bottom: 0;
+  color: #e5ebff;
+}
+
+.table thead th {
+  color: #aeb8cf;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom-color: #2f3a51;
+}
+
+.table tbody td {
+  border-bottom-color: #263149;
+}
+
+.classCell {
+  text-transform: capitalize;
+}

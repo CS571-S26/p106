@@ -5,7 +5,16 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/p106',
   plugins: [react()],
-  build : {
-    outDir: "docs"
-  }
+  server: {
+    proxy: {
+      '/api/wynncraft': {
+        target: 'https://api.wynncraft.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/wynncraft/, ''),
+      },
+    },
+  },
+  build: {
+    outDir: 'docs',
+  },
 })

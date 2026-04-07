@@ -1,5 +1,6 @@
-import { Container, Navbar } from "react-bootstrap";
-import { Outlet } from "react-router";
+import { Container, Nav, Navbar } from "react-bootstrap";
+import { NavLink, Outlet } from "react-router";
+import liquidEmerald from "../../assets/liquidEmerald.webp";
 import styles from "./Layout.module.css";
 
 export default function Layout() {
@@ -7,7 +8,15 @@ export default function Layout() {
         <div className={styles.layout}>
             <Navbar className={styles.navbar}>
                 <Container>
-                    <Navbar.Brand className={styles.brand}>WynnTrading</Navbar.Brand>
+                    <Navbar.Brand as={NavLink} end to="/" className={styles.brand}>
+                        <img src={liquidEmerald} alt="Wynnmarket logo" className={styles.brandLogo} />
+                        <span>Wynnmarket</span>
+                    </Navbar.Brand>
+                    <Nav className="ms-auto">
+                        <Nav.Link as={NavLink} to="/leaderboards" className={styles.navLink}>
+                            Leaderboards
+                        </Nav.Link>
+                    </Nav>
                 </Container>
             </Navbar>
             <div className={styles.content}>

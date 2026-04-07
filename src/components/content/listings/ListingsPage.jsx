@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import Listings from "./Listings";
-import liquidEmerald from "../../assets/liquidEmerald.webp";
+import liquidEmerald from "../../../assets/liquidEmerald.webp";
 //test
 const MOCK_LISTINGS = [
     {
