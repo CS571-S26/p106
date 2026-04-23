@@ -16,6 +16,9 @@ export default function Layout() {
                         <Nav.Link as={NavLink} to="/leaderboards" className={styles.navLink}>
                             Leaderboards
                         </Nav.Link>
+                        <Nav.Link as={NavLink} to="/login" className={styles.navLink}>
+                            Login
+                        </Nav.Link>
                     </Nav>
                 </Container>
             </Navbar>

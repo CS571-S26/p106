@@ -1,12 +1,7 @@
 import { Container } from "react-bootstrap";
 import { Link } from "react-router";
 import ProfessionLeaderboard from "./ProfessionLeaderboard";
-
-function formatLeaderboardId(type) {
-    return type
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/^./, (letter) => letter.toUpperCase());
-}
+import { formatLeaderboardId } from "./leaderboardCatalog";
 
 export default function ProfessionLeaderboardPage({ leaderboardId }) {
     const title = `${formatLeaderboardId(leaderboardId)} Leaderboard`;

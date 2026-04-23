@@ -4,11 +4,41 @@ import styles from "./ProfessionLeaderboard.module.css";
 
 const WYNNCRAFT_API_BASE = import.meta.env.DEV ? "/api/wynncraft" : "https://api.wynncraft.com";
 
-function formatInteger(value) {
-    if (value === null || value === undefined) return "-";
-    const numericValue = Number(value);
-    if (Number.isNaN(numericValue)) return "-";
-    return numericValue.toLocaleString("en-US");
+const EXCLUDED_TOP_LEVEL_FIELDS = new Set([
+    "metaScore",
+    "uuid",
+    "characterUuid",
+    "rank",
+    "supportRank",
+    "legacyRankColour",
+    "rankBadge",
+    "banner",
+    "restricted",
+    "metadata"
+]);
+
+const PRIMARY_KEY_ORDER = [
+    "score",
+    "level",
+    "totalLevel",
+    "completions",
+    "territories",
+    "wars",
+    "gambits",
+    "xp",
+    "playtime",
+    "created",
+    "prefix",
+    "characterType"
+];
+
+function isPrimitive(value) {
+    return value === null || value === undefined || ["string", "number", "boolean"].includes(typeof value);
+}
+
+function formatNumeric(value) {
+    if (Number.isInteger(value)) return value.toLocaleString("en-US");
+    return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
 function formatPlaytime(value) {
@@ -18,26 +48,105 @@ function formatPlaytime(value) {
     return `${numericValue.toFixed(2)} hrs`;
 }
 
-function normalizeProfessionRows(payload) {
+function prettyLabel(key) {
+    if (key === "totalLevel") return "Total Level";
+    if (key === "xp") return "XP";
+    return key
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function formatCellValue(value, key) {
+    if (value === null || value === undefined || value === "") return "-";
+
+    if (typeof value === "number") {
+        if (key === "playtime") return formatPlaytime(value);
+        return formatNumeric(value);
+    }
+
+    if (key === "created") {
+        const parsed = Date.parse(value);
+        if (!Number.isNaN(parsed)) {
+            return new Date(parsed).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric"
+            });
+        }
+    }
+
+    if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+    }
+
+    return String(value);
+}
+
+function flattenLeaderboardEntry(row) {
+    const values = {};
+
+    Object.entries(row).forEach(([key, value]) => {
+        if (EXCLUDED_TOP_LEVEL_FIELDS.has(key)) return;
+        if (!isPrimitive(value)) return;
+        values[key] = value;
+    });
+
+    if (!values.name) {
+        values.name = "Unknown";
+    }
+
+    if (row.metadata && typeof row.metadata === "object") {
+        Object.entries(row.metadata).forEach(([key, value]) => {
+            if (!isPrimitive(value)) return;
+            if (values[key] === undefined) {
+                values[key] = value;
+            }
+        });
+    }
+
+    return values;
+}
+
+function pickPrimaryKey(values) {
+    const matchedKey = PRIMARY_KEY_ORDER.find((key) => values[key] !== undefined);
+    if (matchedKey) return matchedKey;
+    return Object.keys(values).find((key) => key !== "name") ?? null;
+}
+
+function buildDetailsText(values, primaryKey) {
+    const detailKeys = Object.keys(values).filter((key) => key !== "name" && key !== primaryKey);
+    if (detailKeys.length === 0) return "-";
+
+    return detailKeys
+        .slice(0, 3)
+        .map((key) => `${prettyLabel(key)}: ${formatCellValue(values[key], key)}`)
+        .join(" | ");
+}
+
+function normalizeLeaderboardRows(payload) {
     return Object.entries(payload ?? {})
         .filter(([position, row]) => /^\d+$/.test(position) && row && typeof row === "object")
-        .map(([position, row]) => ({
-            position: Number(position),
-            name: row.name ?? "Unknown",
-            uuid: row.uuid ?? null,
-            score: row.score ?? null,
-            xp: row.metadata?.xp ?? null,
-            playtime: row.metadata?.playtime ?? null,
-            characterType: row.characterType ?? "unknown",
-            restricted: Boolean(row.restricted)
-        }))
+        .map(([position, row]) => {
+            const values = flattenLeaderboardEntry(row);
+            const primaryKey = pickPrimaryKey(values);
+
+            return {
+                position: Number(position),
+                rowKey: row.uuid ?? row.name ?? position,
+                name: values.name ?? "Unknown",
+                primaryLabel: primaryKey ? prettyLabel(primaryKey) : "Value",
+                primaryValue: primaryKey ? formatCellValue(values[primaryKey], primaryKey) : "-",
+                details: buildDetailsText(values, primaryKey),
+                restricted: Boolean(row.restricted)
+            };
+        })
         .sort((left, right) => left.position - right.position);
 }
 
 export default function ProfessionLeaderboard({
     leaderboardId,
     resultLimit = 20,
-    title = "Profession Leaderboard"
+    title = "Leaderboard"
 }) {
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -63,7 +172,7 @@ export default function ProfessionLeaderboard({
                 }
 
                 const payload = await response.json();
-                const parsedRows = normalizeProfessionRows(payload);
+                const parsedRows = normalizeLeaderboardRows(payload);
                 setRows(parsedRows);
             } catch (err) {
                 if (err.name !== "AbortError") {
@@ -79,7 +188,6 @@ export default function ProfessionLeaderboard({
     }, [leaderboardId, resultLimit]);
 
     const visibleRows = useMemo(() => rows.filter((row) => !row.restricted), [rows]);
-
     return (
         <Card className={styles.card}>
             <Card.Header className={styles.header}>
@@ -92,7 +200,7 @@ export default function ProfessionLeaderboard({
                 {loading ? (
                     <div className={styles.centered}>
                         <Spinner animation="border" size="sm" className="me-2" />
-                        <span>Loading profession data...</span>
+                        <span>Loading leaderboard data...</span>
                     </div>
                 ) : null}
 
@@ -108,23 +216,19 @@ export default function ProfessionLeaderboard({
                     <Table responsive hover className={styles.table}>
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Player</th>
-                                <th>Level</th>
-                                <th>XP</th>
-                                <th>Playtime</th>
-                                <th>Class</th>
+                                <th>Rank</th>
+                                <th>Name</th>
+                                <th>Scoring Method</th>
+                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody>
                             {visibleRows.map((row) => (
-                                <tr key={`${row.position}-${row.uuid ?? row.name}`}>
+                                <tr key={`${row.position}-${row.rowKey}`}>
                                     <td>{row.position}</td>
                                     <td>{row.name}</td>
-                                    <td>{formatInteger(row.score)}</td>
-                                    <td>{formatInteger(row.xp)}</td>
-                                    <td>{formatPlaytime(row.playtime)}</td>
-                                    <td className={styles.classCell}>{row.characterType}</td>
+                                    <td>{`${row.primaryLabel}: ${row.primaryValue}`}</td>
+                                    <td>{row.details}</td>
                                 </tr>
                             ))}
                         </tbody>
