@@ -4,7 +4,7 @@ import styles from "./ProfessionLeaderboard.module.css";
 
 const WYNNCRAFT_API_BASE = "https://api.wynncraft.com";
 const LOCAL_WYNNCRAFT_API_BASE = "/api/wynncraft";
-const CORS_PROXY_BASE = "https://api.allorigins.win/raw?url=";
+const PROXY_TIMEOUT_MS = 8000;
 
 const EXCLUDED_TOP_LEVEL_FIELDS = new Set([
     "metaScore",
@@ -155,7 +155,49 @@ function buildFetchUrls(leaderboardId, resultLimit) {
     }
 
     const directUrl = buildLeaderboardUrl(leaderboardId, resultLimit);
-    return [`${CORS_PROXY_BASE}${encodeURIComponent(directUrl)}`];
+    const encodedUrl = encodeURIComponent(directUrl);
+
+    return [
+        `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`,
+        `https://corsproxy-8uo5.onrender.com/?url=${encodedUrl}`,
+        `https://api.allorigins.win/raw?url=${encodedUrl}`
+    ];
+}
+
+async function fetchJson(url, signal) {
+    let timedOut = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+    }, PROXY_TIMEOUT_MS);
+    const abortRequest = () => controller.abort();
+
+    if (signal.aborted) {
+        controller.abort();
+    } else {
+        signal.addEventListener("abort", abortRequest, { once: true });
+    }
+
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+
+        if (!response.ok) {
+            throw new Error(`Request failed (${response.status})`);
+        }
+
+        const text = await response.text();
+        return JSON.parse(text);
+    } catch (err) {
+        if (timedOut) {
+            throw new Error("Request timed out");
+        }
+
+        throw err;
+    } finally {
+        clearTimeout(timeoutId);
+        signal.removeEventListener("abort", abortRequest);
+    }
 }
 
 async function fetchLeaderboardPayload(leaderboardId, resultLimit, signal) {
@@ -164,13 +206,7 @@ async function fetchLeaderboardPayload(leaderboardId, resultLimit, signal) {
 
     for (const url of urls) {
         try {
-            const response = await fetch(url, { signal });
-
-            if (!response.ok) {
-                throw new Error(`Request failed (${response.status})`);
-            }
-
-            return response.json();
+            return await fetchJson(url, signal);
         } catch (err) {
             if (err.name === "AbortError") throw err;
             lastError = err;
