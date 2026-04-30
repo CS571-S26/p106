@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Card, Spinner, Table } from "react-bootstrap";
 import styles from "./ProfessionLeaderboard.module.css";
 
-const WYNNCRAFT_API_BASE = import.meta.env.DEV ? "/api/wynncraft" : "https://api.wynncraft.com";
+const WYNNCRAFT_API_BASE = "https://api.wynncraft.com";
+const LOCAL_WYNNCRAFT_API_BASE = "/api/wynncraft";
+const CORS_PROXY_BASE = "https://api.allorigins.win/raw?url=";
 
 const EXCLUDED_TOP_LEVEL_FIELDS = new Set([
     "metaScore",
@@ -143,6 +145,41 @@ function normalizeLeaderboardRows(payload) {
         .sort((left, right) => left.position - right.position);
 }
 
+function buildLeaderboardUrl(leaderboardId, resultLimit, apiBase = WYNNCRAFT_API_BASE) {
+    return `${apiBase}/v3/leaderboards/${encodeURIComponent(leaderboardId)}?resultLimit=${resultLimit}`;
+}
+
+function buildFetchUrls(leaderboardId, resultLimit) {
+    if (import.meta.env.DEV) {
+        return [buildLeaderboardUrl(leaderboardId, resultLimit, LOCAL_WYNNCRAFT_API_BASE)];
+    }
+
+    const directUrl = buildLeaderboardUrl(leaderboardId, resultLimit);
+    return [`${CORS_PROXY_BASE}${encodeURIComponent(directUrl)}`];
+}
+
+async function fetchLeaderboardPayload(leaderboardId, resultLimit, signal) {
+    const urls = buildFetchUrls(leaderboardId, resultLimit);
+    let lastError = null;
+
+    for (const url of urls) {
+        try {
+            const response = await fetch(url, { signal });
+
+            if (!response.ok) {
+                throw new Error(`Request failed (${response.status})`);
+            }
+
+            return response.json();
+        } catch (err) {
+            if (err.name === "AbortError") throw err;
+            lastError = err;
+        }
+    }
+
+    throw lastError ?? new Error("Failed to load leaderboard");
+}
+
 export default function ProfessionLeaderboard({
     leaderboardId,
     resultLimit = 20,
@@ -160,18 +197,11 @@ export default function ProfessionLeaderboard({
             setError(null);
 
             try {
-                const response = await fetch(
-                    `${WYNNCRAFT_API_BASE}/v3/leaderboards/${encodeURIComponent(
-                        leaderboardId
-                    )}?resultLimit=${resultLimit}`,
-                    { signal: controller.signal }
+                const payload = await fetchLeaderboardPayload(
+                    leaderboardId,
+                    resultLimit,
+                    controller.signal
                 );
-
-                if (!response.ok) {
-                    throw new Error(`Request failed (${response.status})`);
-                }
-
-                const payload = await response.json();
                 const parsedRows = normalizeLeaderboardRows(payload);
                 setRows(parsedRows);
             } catch (err) {
