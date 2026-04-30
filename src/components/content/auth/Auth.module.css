@@ -1,0 +1,130 @@
+.authPage {
+  min-height: calc(100vh - 88px);
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.authCard {
+  --bs-card-bg: rgba(23, 29, 43, 0.94);
+  --bs-card-border-color: #2c3954;
+  color: #d8dfef;
+  border-radius: 8px;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.28);
+}
+
+.authTitle {
+  margin-bottom: 1.5rem;
+  color: #f1f5ff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.authForm {
+  display: grid;
+  gap: 1rem;
+}
+
+.authForm label {
+  color: #c9d3e8;
+  font-weight: 600;
+}
+
+.authForm input {
+  color: #f1f5ff;
+  border-color: #384766;
+  background: #111722;
+}
+
+.authForm input:focus {
+  color: #f1f5ff;
+  border-color: #8cf7b6;
+  background: #111722;
+  box-shadow: 0 0 0 0.2rem rgba(140, 247, 182, 0.18);
+}
+
+.primaryButton {
+  --bs-btn-bg: #21895b;
+  --bs-btn-border-color: #21895b;
+  --bs-btn-hover-bg: #28a96e;
+  --bs-btn-hover-border-color: #28a96e;
+  --bs-btn-active-bg: #197047;
+  --bs-btn-active-border-color: #197047;
+  --bs-btn-disabled-bg: #4d5a70;
+  --bs-btn-disabled-border-color: #4d5a70;
+  width: 100%;
+  font-weight: 700;
+}
+
+.googleButton {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #eef4ff;
+  border-color: #43516b;
+  font-weight: 700;
+}
+
+.googleButton:hover,
+.googleButton:focus-visible {
+  color: #ffffff;
+  border-color: #8cf7b6;
+  background: rgba(140, 247, 182, 0.1);
+}
+
+.googleIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+}
+
+.authSwitch {
+  margin: 1rem 0 0;
+  color: #c9d3e8;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.authSwitch a {
+  color: #8cf7b6;
+  font-weight: 700;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: #95a3bf;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #384766;
+}
+
+.authAlert {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.authNav {
+  min-height: 56px;
+  padding: 0 1rem;
+  border-bottom: 1px solid #2a344a;
+  background: rgba(17, 21, 31, 0.9);
+}
+
+.authNavLinks {
+  width: 100%;
+  justify-content: center;
+  gap: 1rem;
+}

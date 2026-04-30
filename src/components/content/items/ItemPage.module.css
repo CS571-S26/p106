@@ -1,0 +1,44 @@
+.backLink {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  color: #9cecf8;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.backLink:hover,
+.backLink:focus {
+  color: #d6fbff;
+  text-decoration: underline;
+}
+
+.pageShell {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 2rem;
+}
+
+.message,
+.unsupportedCard {
+  width: min(100%, 39rem);
+  margin: 0;
+  padding: 1.15rem;
+  border: 1px solid rgba(150, 168, 190, 0.24);
+  border-radius: 8px;
+  background: rgba(13, 19, 28, 0.86);
+  color: #c7d1df;
+}
+
+.unsupportedCard h1 {
+  margin: 0 0 0.5rem;
+  color: #f4f7fb;
+  font-size: 1.5rem;
+}
+
+.unsupportedCard pre {
+  max-height: 28rem;
+  margin: 1rem 0 0;
+  overflow: auto;
+  color: #e7edf6;
+  white-space: pre-wrap;
+}

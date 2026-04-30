@@ -57,13 +57,26 @@
   letter-spacing: 0.01em;
 }
 
+.navButton {
+  color: #dbe2f5;
+  padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
+  border: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
 .navLink:hover,
-.navLink:focus-visible {
+.navLink:focus-visible,
+.navButton:hover,
+.navButton:focus-visible {
   color: #ffffff;
+  text-decoration: none;
 }
 
 .navLink:active,
-.navLink[aria-current="page"] {
+.navLink[aria-current="page"],
+.navButton:active {
   color: #8cf7b6;
 }
 

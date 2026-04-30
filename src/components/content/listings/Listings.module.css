@@ -1,156 +1,187 @@
-.listingCard {
-  --rarity-border: #ffffff;
-  border-color: var(--rarity-border) !important;
-  border-radius: 6px !important;
-  background: rgba(21, 10, 24, 0.95);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.34);
+.pageTitle {
+  margin-bottom: 1.15rem;
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
+  font-weight: 750;
+  color: #f4f7fb;
 }
 
-.icon {
-  width: 38px;
-  height: 38px;
+.listingsPanel {
+  overflow: hidden;
+  border: 1px solid rgba(150, 168, 190, 0.24);
+  border-radius: 8px;
+  background: rgba(13, 19, 28, 0.86);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+.listingHeader,
+.listingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(6rem, 0.35fr) minmax(15rem, 0.65fr) 3.5rem;
+  gap: 1rem;
+  align-items: center;
+}
+
+.listingHeader {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(150, 168, 190, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+  color: #aeb9c8;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.listingRow {
+  min-height: 4rem;
+  padding: 0;
+  border-bottom: 1px solid rgba(150, 168, 190, 0.14);
+  color: inherit;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.listingRow:last-child {
+  border-bottom: 0;
+}
+
+.listingRow:hover,
+.listingRow:focus-within {
+  background: rgba(106, 223, 240, 0.08);
+  border-color: rgba(106, 223, 240, 0.22);
+  color: inherit;
+  outline: none;
+}
+
+.listingLink {
+  display: grid;
+  grid-column: 1 / 4;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0.8rem 0 0.8rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.listingLink:hover,
+.listingLink:focus-visible {
+  color: inherit;
+  outline: none;
+}
+
+.itemName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #f4f7fb;
+  font-weight: 700;
+}
+
+.quantity {
+  color: #d6dfec;
+  font-variant-numeric: tabular-nums;
+}
+
+.priceDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.pricePart {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: #e8fff2;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.priceCount {
+  min-width: 1ch;
+}
+
+.priceIcon {
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   image-rendering: pixelated;
-  flex-shrink: 0;
 }
 
-.title {
-  font-size: 1.05rem;
-  line-height: 1.2;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.85);
+.message {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  color: #c7d1df;
 }
 
-.unidentified {
-  color: #e9d0ff;
+.errorMessage {
+  margin: 0;
+  padding: 1rem;
+  color: #ffd7dc;
+  background: rgba(190, 42, 65, 0.18);
+  border-bottom: 1px solid rgba(255, 138, 156, 0.24);
+  overflow-wrap: anywhere;
 }
 
-.overallPct {
-  margin-left: 0.45rem;
-  color: #c5c8d4;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.statRow {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: baseline;
-  column-gap: 0.55rem;
-  margin-bottom: 0.35rem;
-  font-size: 0.96rem;
-}
-
-.statValue {
-  font-weight: 700;
-}
-
-.positive {
-  color: #56fe56;
-}
-
-.positive::before {
-  content: "+";
-}
-
-.negative {
-  color: #f85252;
-}
-
-.statName {
-  color: #d9d7d9;
-}
-
-.statPct {
-  color: #c1c0c1;
-  font-size: 0.9rem;
-}
-
-.priceMeta {
-  margin-left: 0.45rem;
-  color: #c4c6d0;
-  font-size: 0.8rem;
-}
-
-.avgGood {
-  color: #56fe56;
-}
-
-.avgHigh {
-  color: #f85252;
-}
-
-.avgNeutral {
-  color: #c1c0c1;
-}
-
-.itemFooter {
-  margin-top: 0.55rem;
+.favoriteHeader {
   text-align: center;
-  color: #8f93a2;
 }
 
-.mythicCard {
-  --rarity-border: rgb(162, 0, 162);
+.favoriteButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-self: center;
+  border: 1px solid rgba(140, 247, 182, 0.38);
+  border-radius: 999px;
+  background: rgba(10, 14, 21, 0.5);
+  color: #ffd86b;
+  font-size: 1.45rem;
+  line-height: 1;
 }
 
-.fabledCard {
-  --rarity-border: rgb(246, 62, 62);
+.favoriteButton:hover,
+.favoriteButton:focus-visible {
+  border-color: #ffd86b;
+  background: rgba(255, 216, 107, 0.12);
+  outline: none;
 }
 
-.legendaryCard {
-  --rarity-border: rgb(80, 253, 255);
+.favoriteSpacer {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-.rareCard {
-  --rarity-border: rgb(255, 80, 232);
-}
-
-.uniqueCard {
-  --rarity-border: rgb(252, 252, 84);
-}
-
-.setCard {
-  --rarity-border: rgb(90, 255, 90);
-}
-
-.commonCard {
-  --rarity-border: rgb(210, 214, 226);
-}
-
-.mythic {
-  color: rgb(187, 0, 187);
-}
-
-.fabled {
-  color: #ff5555;
-}
-
-.legendary {
-  color: #55ffff;
-}
-
-.rare {
-  color: #ff55ff;
-}
-
-.unique {
-  color: #ffff55;
-}
-
-.set {
-  color: #55ff55;
-}
-
-.common {
-  color: #f2f4fa;
-}
-
-@media (max-width: 576px) {
-  .title {
-    font-size: 1rem;
+@media (max-width: 680px) {
+  .listingHeader {
+    display: none;
   }
 
-  .statRow {
-    font-size: 0.9rem;
+  .listingRow {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    align-items: start;
+    padding: 0.8rem 1rem;
+  }
+
+  .listingLink {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .quantity::before {
+    content: "Quantity ";
+    color: #98a6b8;
+    font-weight: 700;
+  }
+
+  .favoriteButton {
+    justify-self: start;
   }
 }

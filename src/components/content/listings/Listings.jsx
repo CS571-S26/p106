@@ -1,125 +1,78 @@
-import { Card, Stack } from "react-bootstrap";
+import { Link } from "react-router";
+import emerald from "../../../assets/emerald.webp";
+import emeraldBlock from "../../../assets/emeraldBlock.webp";
+import liquidEmerald from "../../../assets/liquidEmerald.webp";
 import styles from "./Listings.module.css";
 
-const RARITY_CLASS = {
-    mythic: styles.mythic,
-    fabled: styles.fabled,
-    legendary: styles.legendary,
-    rare: styles.rare,
-    unique: styles.unique,
-    common: styles.common,
-    normal: styles.common,
-    set: styles.set
-};
+const EMERALDS_PER_BLOCK = 64;
+const BLOCKS_PER_LIQUID = 64;
+const EMERALDS_PER_LIQUID = EMERALDS_PER_BLOCK * BLOCKS_PER_LIQUID;
 
-const RARITY_BORDER_CLASS = {
-    mythic: styles.mythicCard,
-    fabled: styles.fabledCard,
-    legendary: styles.legendaryCard,
-    rare: styles.rareCard,
-    unique: styles.uniqueCard,
-    common: styles.commonCard,
-    normal: styles.commonCard,
-    set: styles.setCard
-};
+const DENOMINATIONS = [
+    { key: "liquid", label: "Liquid emeralds", icon: liquidEmerald, value: EMERALDS_PER_LIQUID },
+    { key: "block", label: "Emerald blocks", icon: emeraldBlock, value: EMERALDS_PER_BLOCK },
+    { key: "emerald", label: "Emeralds", icon: emerald, value: 1 }
+];
 
-const join = (...classNames) => classNames.filter(Boolean).join(" ");
+function getPriceParts(price) {
+    let remaining = Math.max(0, Math.floor(Number(price) || 0));
 
-function getRarityClass(rarity) {
-    if (!rarity) return styles.common;
-    return RARITY_CLASS[rarity.toLowerCase()] ?? styles.common;
+    const parts = DENOMINATIONS.map((denomination) => {
+        const count = Math.floor(remaining / denomination.value);
+        remaining %= denomination.value;
+        return { ...denomination, count };
+    }).filter((part) => part.count > 0);
+
+    return parts.length > 0 ? parts : [{ ...DENOMINATIONS[2], count: 0 }];
 }
 
-function getCardBorderClass(rarity) {
-    if (!rarity) return styles.commonCard;
-    return RARITY_BORDER_CLASS[rarity.toLowerCase()] ?? styles.commonCard;
+function formatTotalEmeralds(price) {
+    const emeralds = Math.max(0, Math.floor(Number(price) || 0));
+    return `${emeralds.toLocaleString()} emerald${emeralds === 1 ? "" : "s"}`;
 }
 
-function getAvgClass(avgPct) {
-    if (!avgPct) return styles.avgNeutral;
-
-    const numericPct = Number.parseFloat(String(avgPct).replace("%", ""));
-    if (Number.isNaN(numericPct)) return styles.avgNeutral;
-    return numericPct > 100 ? styles.avgHigh : styles.avgGood;
-}
-
-export default function Listings({
-    name,
-    rarity,
-    icon,
-    rollPct,
-    tierText,
-    amount,
-    price,
-    avgPct,
-    recorded,
-    stats,
-    unidentified
-}) {
-    const rarityClass = getRarityClass(rarity);
-    const cardBorderClass = getCardBorderClass(rarity);
-    const safeStats = stats ?? [];
+function PriceDisplay({ price }) {
+    const parts = getPriceParts(price);
 
     return (
-        <Card className={join("h-100 border-2 shadow-sm", styles.listingCard, cardBorderClass)}>
-            <Card.Body className="d-flex flex-column p-3">
-                <header className="d-flex align-items-center justify-content-center gap-2">
-                    {icon ? <img src={icon} alt={`${name} icon`} className={styles.icon} /> : null}
-                    <Card.Title as="h5" className={join("mb-0 text-center", styles.title, rarityClass)}>
-                        {unidentified ? <span className={styles.unidentified}>Unidentified </span> : null}
-                        {name}
-                        {rollPct ? <span className={styles.overallPct}>[{rollPct}]</span> : null}
-                    </Card.Title>
-                </header>
+        <div className={styles.priceDisplay} aria-label={formatTotalEmeralds(price)} title={formatTotalEmeralds(price)}>
+            {parts.map((part) => (
+                <span key={part.key} className={styles.pricePart}>
+                    <span className={styles.priceCount}>{part.count.toLocaleString()}</span>
+                    <img src={part.icon} alt={part.label} className={styles.priceIcon} />
+                </span>
+            ))}
+        </div>
+    );
+}
 
-                {safeStats.length > 0 ? (
-                    <Stack gap={1} className="mt-3">
-                        {safeStats.map((stat, idx) => (
-                            <div key={`${stat.name}-${idx}`} className={styles.statRow}>
-                                <span
-                                    className={join(
-                                        styles.statValue,
-                                        stat.positive ? styles.positive : styles.negative
-                                    )}
-                                >
-                                    {stat.value}
-                                </span>
-                                <span className={styles.statName}>{stat.name}</span>
-                                <span className={styles.statPct}>[{stat.pct}]</span>
-                            </div>
-                        ))}
-                    </Stack>
-                ) : null}
+export default function Listings({ id, name, quantity, price, isFavorite = false, onToggleFavorite, showFavoriteAction = false }) {
+    const itemPath = `/items/${encodeURIComponent(name)}`;
 
-                <div className="mt-auto pt-2">
-                    {tierText ? (
-                        <p className={join("text-center fw-semibold mb-2", rarityClass)}>{tierText}</p>
-                    ) : null}
-
-                    <hr className="my-2 border-secondary-subtle" />
-
-                    <p className="mb-2 small text-secondary-emphasis">
-                        Amount
-                        <br />
-                        <strong className="text-light-emphasis">{amount}</strong>
-                    </p>
-
-                    <p className="mb-0 small text-secondary-emphasis">
-                        Price
-                        <br />
-                        <strong className="text-light-emphasis">{price}</strong>
-                        {avgPct ? (
-                            <small className={styles.priceMeta}>
-                                (<span className={getAvgClass(avgPct)}>{avgPct}</span> of avg)
-                            </small>
-                        ) : null}
-                    </p>
-
-                    <footer className={styles.itemFooter}>
-                        <small>{recorded}</small>
-                    </footer>
-                </div>
-            </Card.Body>
-        </Card>
+    return (
+        <div className={styles.listingRow}>
+            <Link to={itemPath} state={{ itemName: name }} className={styles.listingLink}>
+                <div className={styles.itemName}>{name}</div>
+                <div className={styles.quantity}>{Number(quantity || 0).toLocaleString()}</div>
+                <PriceDisplay price={price} />
+            </Link>
+            {showFavoriteAction ? (
+                <button
+                    type="button"
+                    className={styles.favoriteButton}
+                    aria-label={isFavorite ? `Remove ${name} from favorites` : `Add ${name} to favorites`}
+                    title={isFavorite ? "Unstar" : "Star"}
+                    onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onToggleFavorite?.(id);
+                    }}
+                >
+                    {isFavorite ? "★" : "☆"}
+                </button>
+            ) : (
+                <span className={styles.favoriteSpacer} aria-hidden="true" />
+            )}
+        </div>
     );
 }

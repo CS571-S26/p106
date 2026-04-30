@@ -1,9 +1,20 @@
-import { Container, Nav, Navbar } from "react-bootstrap";
-import { NavLink, Outlet } from "react-router";
+import { Button, Container, Nav, Navbar } from "react-bootstrap";
+import { NavLink, Outlet, useNavigate } from "react-router";
+import { doSignOut } from "../../firebase/auth";
+import { useAuth } from "../../contexts/useAuth";
 import liquidEmerald from "../../assets/liquidEmerald.webp";
 import styles from "./Layout.module.css";
 
 export default function Layout() {
+    const navigate = useNavigate();
+    const { userLoggedIn } = useAuth();
+
+    function handleSignOut() {
+        doSignOut().then(() => {
+            navigate("/login");
+        });
+    }
+
     return (
         <div className={styles.layout}>
             <Navbar className={styles.navbar}>
@@ -16,9 +27,20 @@ export default function Layout() {
                         <Nav.Link as={NavLink} to="/leaderboards" className={styles.navLink}>
                             Leaderboards
                         </Nav.Link>
-                        <Nav.Link as={NavLink} to="/login" className={styles.navLink}>
-                            Login
-                        </Nav.Link>
+                        {userLoggedIn ? (
+                            <Nav.Link as={NavLink} to="/favorites" className={styles.navLink}>
+                                Favorites
+                            </Nav.Link>
+                        ) : null}
+                        {userLoggedIn ? (
+                            <Button variant="link" className={styles.navButton} onClick={handleSignOut}>
+                                Logout
+                            </Button>
+                        ) : (
+                            <Nav.Link as={NavLink} to="/login" className={styles.navLink}>
+                                Login
+                            </Nav.Link>
+                        )}
                     </Nav>
                 </Container>
             </Navbar>

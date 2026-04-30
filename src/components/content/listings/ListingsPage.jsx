@@ -1,82 +1,128 @@
-import { Col, Container, Row } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Container } from "react-bootstrap";
+import { Navigate } from "react-router";
+import { addFavoriteListing, removeFavoriteListing, subscribeToFavorites } from "../../../firebase/favorites";
+import { useAuth } from "../../../contexts/useAuth";
 import Listings from "./Listings";
-import liquidEmerald from "../../../assets/liquidEmerald.webp";
-//test
-const MOCK_LISTINGS = [
-    {
-        id: 1,
-        name: "Fatal",
-        rarity: "Mythic",
-        icon: liquidEmerald,
-        rollPct: "72.7%",
-        tierText: "Mythic Item [3]",
-        amount: 1,
-        price: "2stx 16le",
-        avgPct: "99.7%",
-        recorded: "0 minutes ago",
-        stats: [
-            { value: "7", name: "Mana Steal", pct: "83.3%", positive: true },
-            { value: "25%", name: "Spell Damage", pct: "68.0%", positive: true },
-            { value: "13%", name: "Walk Speed", pct: "53.3%", positive: true },
-            { value: "-23%", name: "1st Spell Cost", pct: "81.2%", positive: false }
-        ]
-    },
-    {
-        id: 2,
-        name: "Viral Tentacle",
-        rarity: "Common",
-        icon: liquidEmerald,
-        tierText: "Common Item",
-        amount: 1,
-        price: "21e",
-        avgPct: "14.7%",
-        recorded: "0 minutes ago",
-        stats: []
-    },
-    {
-        id: 3,
-        name: "Darkweaver",
-        rarity: "Rare",
-        icon: liquidEmerald,
-        unidentified: true,
-        tierText: "Rare Item",
-        amount: 1,
-        price: "12eb 38e",
-        avgPct: "50.8%",
-        recorded: "0 minutes ago",
-        stats: []
-    },
-    {
-        id: 4,
-        name: "Stardew",
-        rarity: "Mythic",
-        icon: liquidEmerald,
-        rollPct: "61.5%",
-        tierText: "Mythic Item [4]",
-        amount: 1,
-        price: "35le 44eb 51e",
-        avgPct: "48.6%",
-        recorded: "2 minutes ago",
-        stats: [
-            { value: "11", name: "Mana Steal", pct: "40.0%", positive: true },
-            { value: "26%", name: "Reflection", pct: "72.0%", positive: true },
-            { value: "-15", name: "Mana Regen", pct: "60.0%", positive: false },
-            { value: "45%", name: "Thunder Damage", pct: "97.1%", positive: true }
-        ]
-    }
-];
+import { fetchListings } from "./listingsApi";
+import styles from "./Listings.module.css";
 
-export default function ListingsPage() {
+export default function ListingsPage({ favoritesOnly = false }) {
+    const { currentUser, userLoggedIn } = useAuth();
+    const [listings, setListings] = useState([]);
+    const [favorites, setFavorites] = useState([]);
+    const [status, setStatus] = useState("loading");
+    const [error, setError] = useState("");
+    const [favoriteError, setFavoriteError] = useState("");
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        async function loadListings() {
+            try {
+                setListings(await fetchListings(controller.signal));
+                setStatus("ready");
+            } catch (err) {
+                if (err.name === "AbortError") return;
+                setError(err.message);
+                setStatus("error");
+            }
+        }
+
+        loadListings();
+        return () => controller.abort();
+    }, []);
+
+    useEffect(() => {
+        if (!currentUser) return undefined;
+
+        const authCredential = { user: currentUser };
+
+        return subscribeToFavorites(
+            authCredential,
+            (nextFavorites) => {
+                setFavorites(nextFavorites);
+                setFavoriteError("");
+            },
+            (err) => setFavoriteError(err.message)
+        );
+    }, [currentUser]);
+
+    if (favoritesOnly && !userLoggedIn) {
+        return <Navigate to="/login" replace />;
+    }
+
+    async function handleToggleFavorite(listingId) {
+        const authCredential = currentUser ? { user: currentUser } : null;
+        const numericListingId = Number(listingId);
+
+        if (!authCredential) {
+            setFavoriteError("You must be signed in to favorite listings.");
+            return;
+        }
+
+        if (!Number.isFinite(numericListingId)) {
+            setFavoriteError("This listing does not have a valid numeric id.");
+            return;
+        }
+
+        const wasFavorite = favorites.includes(numericListingId);
+        const previousFavorites = favorites;
+
+        setFavoriteError("");
+        setFavorites((currentFavorites) => (
+            wasFavorite
+                ? currentFavorites.filter((favorite) => favorite !== numericListingId)
+                : [...new Set([...currentFavorites, numericListingId])]
+        ));
+
+        try {
+            if (wasFavorite) {
+                await removeFavoriteListing(authCredential, numericListingId);
+            } else {
+                await addFavoriteListing(authCredential, numericListingId);
+            }
+        } catch (err) {
+            setFavorites(previousFavorites);
+            setFavoriteError(err.message);
+        }
+    }
+
+    const activeFavorites = currentUser ? favorites : [];
+    const favoriteSet = new Set(activeFavorites);
+    const visibleListings = favoritesOnly
+        ? listings.filter((listing) => favoriteSet.has(listing.id))
+        : listings;
+
     return (
         <Container>
-            <h1>Trademarket Listings</h1>
-            <Row xs={1} sm={2} lg={3} xl={4} xxl={5}>
-                {MOCK_LISTINGS.map((listing) => (
-                    <Col key={listing.id}>
-                        <Listings {...listing} />
-                    </Col>
+            <h1 className={styles.pageTitle}>{favoritesOnly ? "Favorite Listings" : "Trademarket Listings"}</h1>
+
+            <section className={styles.listingsPanel} aria-live="polite">
+                <div className={styles.listingHeader}>
+                    <span>Item</span>
+                    <span>Quantity</span>
+                    <span>Price</span>
+                    <span className={styles.favoriteHeader}>Favorite</span>
+                </div>
+
+                {status === "loading" ? <p className={styles.message}>Loading listings...</p> : null}
+                {status === "error" ? <p className={styles.message}>Could not load listings: {error}</p> : null}
+                {favoriteError ? <p className={styles.errorMessage}>Could not update favorites: {favoriteError}</p> : null}
+                {status === "ready" && visibleListings.length === 0 ? (
+                    <p className={styles.message}>{favoritesOnly ? "You do not have any favorite listings yet." : "No listings found."}</p>
+                ) : null}
+
+                {visibleListings.map((listing) => (
+                    <Listings
+                        key={listing.id}
+                        {...listing}
+                        isFavorite={favoriteSet.has(listing.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        showFavoriteAction={userLoggedIn}
+                    />
                 ))}
-            </Row>
+            </section>
         </Container>
     );
 }
