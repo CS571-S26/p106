@@ -45,12 +45,16 @@
 }
 
 .primaryButton {
-  --bs-btn-bg: #21895b;
-  --bs-btn-border-color: #21895b;
-  --bs-btn-hover-bg: #28a96e;
-  --bs-btn-hover-border-color: #28a96e;
-  --bs-btn-active-bg: #197047;
-  --bs-btn-active-border-color: #197047;
+  --bs-btn-color: #ffffff;
+  --bs-btn-bg: #176c46;
+  --bs-btn-border-color: #176c46;
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: #1f7a50;
+  --bs-btn-hover-border-color: #1f7a50;
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: #115739;
+  --bs-btn-active-border-color: #115739;
+  --bs-btn-disabled-color: #ffffff;
   --bs-btn-disabled-bg: #4d5a70;
   --bs-btn-disabled-border-color: #4d5a70;
   width: 100%;
